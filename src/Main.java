@@ -63,7 +63,7 @@ public class Main {
 
     private static void reseverRoom(Connection con, Scanner scan) {
 
-        System.out.print("Enter Guest-Name : ");
+        System.out.print("Enter Guest Name : ");
         String name = scan.next();
         System.out.print("\nEnter Room Number : ");
         int roomNum = scan.nextInt();
