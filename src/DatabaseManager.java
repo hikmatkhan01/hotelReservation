@@ -12,7 +12,7 @@ public class DatabaseManager {
     public void driverLoad(){
         try {
               Class.forName("com.mysql.cj.jdbc.Driver");
-              System.out.print("Driver Loaded");
+              System.out.print("Driver Loaded succefully");
            } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
