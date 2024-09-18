@@ -48,4 +48,15 @@ public class HotelReservation {
     public void setReservation_date(String reservation_date) {
         this.reservation_date = reservation_date;
     }
+
+    @Override
+    public String toString() {
+        return "HotelReservation{" +
+                "reservation_id=" + reservation_id +
+                ", guest_name='" + guest_name + '\'' +
+                ", room_num='" + room_num + '\'' +
+                ", contact_number='" + contact_number + '\'' +
+                ", reservation_date='" + reservation_date + '\'' +
+                '}';
+    }
 }

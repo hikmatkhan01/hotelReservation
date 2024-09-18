@@ -5,6 +5,7 @@ import java.util.Scanner;
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
+    private  static HotelReservation hr;
 
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/hotel_db";
@@ -13,6 +14,7 @@ public class Main {
         Connection con;
         DatabaseManager db = new DatabaseManager();
         db.driverLoad();
+       hr = new HotelReservation();
 //      db.connection();
         try {
             con = DriverManager.getConnection(url, userName, password);
@@ -64,13 +66,12 @@ public class Main {
     private static void reseverRoom(Connection con, Scanner scan) {
 
         System.out.print("Enter Guest Name : ");
-        String name = scan.next();
+          hr.setGuest_name(scan.next());
         System.out.print("\nEnter Room Number : ");
-        int roomNum = scan.nextInt();
+          hr.setRoom_num(String.valueOf(scan.nextInt()));
         System.out.print("\nEnter Contact Number : ");
-        String cont_number = scan.next();
-        String insertQuer = "INSERT INTO reservation (guest_name, room_number, contact_number) VALUES ('" + name + "', '" + roomNum + "', '" + cont_number + "');";
-        //String insertQuer = "INSERT INTO reservation(guest_name,room_number,contact_number) VALUES('+name+','+roomNum+','+cont_number+');";
+          hr.setContact_number(scan.next());
+        String insertQuer = "INSERT INTO reservation (guest_name, room_number, contact_number) VALUES ('" + hr.getGuest_name() + "', '" + hr.getRoom_num() + "', '" + hr.getContact_number() + "');";
         try {
             Statement sta = con.createStatement();
             int rowAffect = sta.executeUpdate(insertQuer);
@@ -93,15 +94,19 @@ public class Main {
             System.out.println("| Reservation ID | Guest    | Room Number  | Contact Number    | Reservation Date   |");
             System.out.println("+----------------+----------+--------------+-------------------+--------------------+");
             while (rs.next()) {
-                int rv_id = rs.getInt("rv_id");
-                String guest_name = rs.getString("guest_name");
-                int room_number = rs.getInt("room_number");
-                String contact_number = rs.getString("contact_number");
-                Date rv_date = rs.getDate("reservation_date");
+//                int rv_id = rs.getInt("rv_id");
+                hr.setReservation_id(rs.getInt("rv_id"));
 
-                System.out.printf("| %-13d | %-13s | %9d  | %14s  | %15s  | \n",
-                        rv_id, guest_name, room_number, contact_number, rv_date);
+                hr.setGuest_name(rs.getString("guest_name"));
 
+                hr.setRoom_num(rs.getString("room_number"));
+
+                hr.setContact_number(rs.getString("contact_number"));
+                //Date rv_date = rs.getDate("reservation_date");
+
+                hr.setReservation_date(String.valueOf(rs.getDate("reservation_date")));
+                System.out.printf("| %-15d | %-10s | %-12s | %-17s | %-18s |\n",
+                        hr.getReservation_id(), hr.getGuest_name(), hr.getRoom_num(), hr.getContact_number(),hr.getReservation_date());
             }
             rs.close();
             sta.close();
@@ -112,17 +117,19 @@ public class Main {
     }
     private static void getRoomNumber(Connection con, Scanner scan){
         System.out.print("Enter Reservation ID: ");
-        int reservationId = scan.nextInt();
+//        int reservationId = scan.nextInt();
+        hr.setReservation_id(scan.nextInt());
         System.out.print("Enter guest name: ");
-        String guestName = scan.next();
-        String getRoom = "SELECT room_number FROM reservation WHERE rv_id = " + reservationId +
-                " AND guest_name = '" + guestName + "'";
+//        String guestName = scan.next();
+        hr.setGuest_name(scan.next());
+        String getRoom = "SELECT room_number FROM reservation WHERE rv_id = " + hr.getReservation_id() +
+                " AND guest_name = '" + hr.getGuest_name() + "'";
         try (Statement sta = con.createStatement()){
             ResultSet rs = sta.executeQuery(getRoom);
              if(rs.next()){
                  int roomNumber = rs.getInt("room_number");
-                 System.out.print("Room number for Reservation ID " +reservationId+ " and Guest "
-                 +guestName + " is: " +roomNumber);
+                 System.out.print("Room number for Reservation ID " +hr.getReservation_id()+ " and Guest "
+                 +hr.getGuest_name() + " is: " +hr.getRoom_num());
              }else {
                  System.out.print("Reservation not found for the given ID and guest name.");
              }
@@ -133,21 +140,25 @@ public class Main {
     private static void updateReservatin(Connection con, Scanner scan){
         try {
                System.out.print("Enter reservation ID to update: ");
-               int rv_id = scan.nextInt();
+              //int rv_id = scan.nextInt();
+               hr.setReservation_id(scan.nextInt());
                scan.nextLine();
-               if(!reservationExist(con,rv_id)){
+               if(!reservationExist(con, hr.getReservation_id())){
                    System.out.println("Reservation not found for the given ID.");
                    return;
                }
                System.out.println("Enter new guest name");
-               String newGuestName = scan.nextLine();
+//               String newGuestName = scan.nextLine();
+               hr.setGuest_name(scan.nextLine());
                System.out.print("Enter new room number");
-               int newRoomNumber = scan.nextInt();
+//               int newRoomNumber = scan.nextInt();
+               hr.setRoom_num(String.valueOf(scan.nextInt()));
                System.out.print("Enter new contact number: ");
-               String newContactNumber = scan.next();
-               String updateQuery = "update reservation set guest_name = '"+newGuestName+"', " +
-                       "room_number = "+newRoomNumber+", "+"contact_number ='"+newContactNumber+"' " +
-                        " WHERE rv_id = " +rv_id;
+//               String newContactNumber = scan.next();
+               hr.setContact_number(scan.next());
+               String updateQuery = "update reservation set guest_name = '"+hr.getGuest_name()+"', " +
+                       "room_number = "+hr.getRoom_num()+", "+"contact_number ='"+hr.getContact_number()+"' " +
+                        " WHERE rv_id = " +hr.getReservation_id();
                try (Statement sta = con.createStatement()){
                     int rowAffects = sta.executeUpdate(updateQuery);
                     if(rowAffects>0){
@@ -164,12 +175,13 @@ public class Main {
     private static void deleteReservation(Connection con, Scanner scan){
         try {
             System.out.print("Enter  reservation  ID to delete: ");
-            int rv_id = scan.nextInt();
-            if(!reservationExist(con,rv_id)){
+//            int rv_id = scan.nextInt();
+            hr.setReservation_id(scan.nextInt());
+            if(!reservationExist(con,hr.getReservation_id())){
                 System.out.println("Reservation not found for the given ID.");
                 return;
             }
-            String delteQuery = "Delete from reservation WHERE rv_id = "+rv_id;
+            String delteQuery = "Delete from reservation WHERE rv_id = "+hr.getReservation_id();
             try (Statement sta = con.createStatement()){
               int  affectRows = sta.executeUpdate(delteQuery);
 
